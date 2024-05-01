@@ -4,6 +4,8 @@ import { CourseRepository } from "../domain/CourseRepository";
 export function createLocalStorageCourseRepository(): CourseRepository {
   return {
     save,
+    get,
+    getAll
   }
 }
 
@@ -11,18 +13,35 @@ function save(course: Course) {
   const courses = getAllFromLocalStorage()
 
   courses.set(course.id, course)
-  console.log('>>> course', course)
+
   localStorage.setItem("courses", JSON.stringify(Array.from(courses.entries())))
 }
 
-function getAllFromLocalStorage(): Map<string, Course> {
-  const courses = localStorage.getItem("courses");
+function get(id: string) {
+  const courses = getAllFromLocalStorage()
+	const course = courses.get(id)
 
-	if (courses === null) {
-		return new Map();
+	if (!course) {
+		return null
 	}
 
-	const map = new Map(JSON.parse(courses) as Iterable<[string, Course]>);
+	return course
+}
 
-	return map;
+function getAll() {
+  const courses = getAllFromLocalStorage()
+
+	return Array.from(courses.values())
+}
+
+function getAllFromLocalStorage(): Map<string, Course> {
+  const courses = localStorage.getItem("courses")
+
+	if (courses === null) {
+		return new Map()
+	}
+
+	const map = new Map(JSON.parse(courses) as Iterable<[string, Course]>)
+
+	return map
 }
