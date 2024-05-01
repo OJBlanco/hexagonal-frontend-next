@@ -1,40 +1,53 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react"
 
-import { useCourseFormData } from "../hooks/useCourseFormData";
-import { FormStatus, useCourseForm } from "../hooks/useCourseForm";
-import { Spinner } from "@/sections/shared/components/Spinner";
+import { useCourseFormData } from "../hooks/useCourseFormData"
+import { FormStatus, useCourseForm } from "../hooks/useCourseForm"
+import { Spinner } from "@/sections/shared/components/Spinner"
+import { TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, isCourseTitleValid } from "@/modules/courses/domain/CourseTitle"
+import { isCourseImageUrlValid } from "@/modules/courses/domain/CourseImageUrl"
 
 
 const initialState = {
 	title: "",
 	imageUrl: "",
-};
+}
 
 export function CreateCourseForm() {
-	const { formData, updateForm, resetForm } = useCourseFormData(initialState);
-	const { formStatus, submitForm, resetFormStatus } = useCourseForm();
-	const [errors, setErrors] = useState(initialState);
+	const { formData, updateForm, resetForm } = useCourseFormData(initialState)
+	const { formStatus, submitForm, resetFormStatus } = useCourseForm()
+	const [errors, setErrors] = useState(initialState)
+
+
+	useEffect(() => {
+		const isTitleValid = isCourseTitleValid(formData.title)
+		const isImageUrlValid = isCourseImageUrlValid(formData.imageUrl)
+
+		setErrors({
+			title: isTitleValid ? '' : `Title must be between ${TITLE_MIN_LENGTH} and ${TITLE_MAX_LENGTH} characters`,
+			imageUrl: isImageUrlValid ? '' : 'Image url is not valid'
+		})
+	}, [formData])
 
 	const handleSubmit = (ev: React.FormEvent) => {
-		ev.preventDefault();
+		ev.preventDefault()
 
-		submitForm(formData);
-	};
+		submitForm(formData)
+	}
 
 	switch (formStatus) {
 		case FormStatus.Loading:
-			return <Spinner />;
+			return <Spinner />
 		case FormStatus.Success:
 			return (
 				<SuccessNotification
 					resetForm={() => {
-						resetForm();
-						resetFormStatus();
+						resetForm()
+						resetFormStatus()
 					}}
 				/>
-			);
+			)
 		case FormStatus.Error:
-			return <ErrorNotification resetForm={resetFormStatus} />;
+			return <ErrorNotification resetForm={resetFormStatus} />
 		case FormStatus.Initial:
 			return (
 				<section id="order" className="">
@@ -42,7 +55,7 @@ export function CreateCourseForm() {
 
 					<form
 						onSubmit={(ev) => {
-							handleSubmit(ev);
+							handleSubmit(ev)
 						}}
 					>
 						<div>
@@ -53,7 +66,7 @@ export function CreateCourseForm() {
 								type="text"
 								value={formData.title}
 								onChange={(ev) => {
-									updateForm({ title: ev.target.value });
+									updateForm({ title: ev.target.value })
 								}}
 							/>
 							{formData.title && errors.title && (
@@ -68,7 +81,7 @@ export function CreateCourseForm() {
 								type="text"
 								value={formData.imageUrl}
 								onChange={(ev) => {
-									updateForm({ imageUrl: ev.target.value });
+									updateForm({ imageUrl: ev.target.value })
 								}}
 							/>
 							{formData.imageUrl && errors.imageUrl && (
@@ -79,9 +92,9 @@ export function CreateCourseForm() {
 						<button type="submit">Create course</button>
 					</form>
 				</section>
-			);
+			)
 		default:
-			assertUnreachable(formStatus);
+			assertUnreachable(formStatus)
 	}
 }
 
@@ -91,7 +104,7 @@ function SuccessNotification({ resetForm }: { resetForm: () => void }) {
 			<h2>🚀 Course created</h2>
 			<button onClick={resetForm}>Create a new course</button>
 		</section>
-	);
+	)
 }
 
 function ErrorNotification({ resetForm }: { resetForm: () => void }) {
@@ -100,9 +113,9 @@ function ErrorNotification({ resetForm }: { resetForm: () => void }) {
 			<h2>🌋 You have an error in your form</h2>
 			<button onClick={resetForm}>Ok, let me try again</button>
 		</section>
-	);
+	)
 }
 
 function assertUnreachable(_x: never): never {
-	throw new Error("Didn't expect to get here");
+	throw new Error("Didn't expect to get here")
 }
