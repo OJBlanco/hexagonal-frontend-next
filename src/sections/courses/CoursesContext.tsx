@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid"
 import { createCourse } from "@/modules/courses/application/create/CreateCourse"
 import { Course } from "@/modules/courses/domain/Course";
 import { CourseRepository } from "@/modules/courses/domain/CourseRepository";
+import { GetAllCourses } from "@/modules/courses/application/get-all/GetAllCourses";
 
 export interface ContextState {
 	courses: Course[];
@@ -27,12 +28,13 @@ export const CoursesContextProvider = ({
 	}
 
 	function getCourses() {
-		setCourses([]);
+		const courses = GetAllCourses(repository);
+		setCourses(courses);
 	}
 
 	useEffect(() => {
-		getCourses();
-	}, []);
+		getCourses()
+	}, [])
 
 	return (
 		<CoursesContext.Provider value={{ courses, createCourse: create }}>
