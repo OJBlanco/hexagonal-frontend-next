@@ -4,9 +4,13 @@ import { createLocalStorageCourseRepository } from "@/modules/courses/infrastruc
 import { CoursesContextProvider } from "@/sections/courses/CoursesContext"
 import { CreateCourseForm } from "@/sections/courses/components/CreateCourseForm"
 
+import { CourseMother } from "../../modules/courses/domain/CourseMother"
+
 describe("CreateCourseForm component", () => {
   it("displays success message when data is correct", async () => {
     const repository = createLocalStorageCourseRepository()
+    const course = CourseMother.create()
+
     render(
       <CoursesContextProvider repository={repository}>
         <CreateCourseForm />
@@ -14,10 +18,10 @@ describe("CreateCourseForm component", () => {
     )
 
     const titleInput = screen.getByLabelText(/title/i)
-    fireEvent.change(titleInput, { target: { value: "Awesome Hexagonal Architecture" } })
+    fireEvent.change(titleInput, { target: { value: course.title } })
 
     const imageUrlInput = screen.getByLabelText(/image/i)
-    fireEvent.change(imageUrlInput, { target: { value: "http://placekitten.com/500/400" } })
+    fireEvent.change(imageUrlInput, { target: { value: course.imageUrl } })
 
     const submitButton = screen.getByText(/create course/i)
 
@@ -30,6 +34,8 @@ describe("CreateCourseForm component", () => {
 
   it("displays error message if title is too short", async () => {
     const repository = createLocalStorageCourseRepository()
+    const { title: invalidTitle } = CourseMother.createWithTooShortTitle()
+
     render(
       <CoursesContextProvider repository={repository}>
         <CreateCourseForm />
@@ -37,8 +43,7 @@ describe("CreateCourseForm component", () => {
     )
 
     const titleInput = screen.getByLabelText(/title/i)
-    fireEvent.change(titleInput, { target: { value: "Aw" } })
-
+    fireEvent.change(titleInput, { target: { value: invalidTitle } })
     const errorMessage = await screen.findByText("Title must be between 5 and 100 characters")
 
     expect(errorMessage).toBeInTheDocument()
@@ -46,6 +51,8 @@ describe("CreateCourseForm component", () => {
 
   it("displays error message if title is too long", async () => {
     const repository = createLocalStorageCourseRepository()
+    const { title: invalidTitle } = CourseMother.createWithTooLongTitle()
+
     render(
       <CoursesContextProvider repository={repository}>
         <CreateCourseForm />
@@ -55,7 +62,7 @@ describe("CreateCourseForm component", () => {
     const titleInput = screen.getByLabelText(/title/i)
     fireEvent.change(
       titleInput,
-      { target: { value: "Amet ex labore dolor amet deserunt. Tempor minim excepteur tempor dolor aute consectetur dolore. Velit Lorem nisi est cillum cupidatat sint cupidatat nostrud adipisicing eu sunt labore adipisicing minim. Sint est veniam irure fugiat ea est consectetur enim ut ipsum nostrud do duis esse. Mollit esse id tempor do deserunt eu ea nulla deserunt ut laboris qui ea." } }
+      { target: { value: invalidTitle } }
     )
 
     const errorMessage = await screen.findByText("Title must be between 5 and 100 characters")
@@ -65,6 +72,8 @@ describe("CreateCourseForm component", () => {
 
   it("displays error message if image url is not a valid url", async () => {
     const repository = createLocalStorageCourseRepository()
+    const { imageUrl: invalidImageUrl } = CourseMother.createWithInvalidImageUrl()
+
     render(
       <CoursesContextProvider repository={repository}>
         <CreateCourseForm />
@@ -72,7 +81,7 @@ describe("CreateCourseForm component", () => {
     )
 
     const imageUrlInput = screen.getByLabelText(/image/i)
-    fireEvent.change(imageUrlInput, { target: { value: "not a valid url" } })
+    fireEvent.change(imageUrlInput, { target: { value: invalidImageUrl } })
 
     const errorMessage = await screen.findByText("Image url is not valid")
 
