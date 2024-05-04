@@ -1,7 +1,9 @@
-import { Course } from "../domain/Course"
-import { CourseRepository } from "../domain/CourseRepository"
+import { Course } from "../domain/Course";
+import { CourseRepository } from "../domain/CourseRepository";
 
-export function createLocalStorageCourseRepository(): CourseRepository {
+const BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
+
+export function createApiCourseRepository(): CourseRepository {
 	return {
 		save,
 		get,
@@ -10,7 +12,7 @@ export function createLocalStorageCourseRepository(): CourseRepository {
 }
 
 async function save(course: Course) {
-	await fetch("/api/courses/create", {
+	await fetch(`${BASE_URL}/api/courses/create`, {
 		method: "POST",
 		body: JSON.stringify({
 			id: course.id,
@@ -21,7 +23,7 @@ async function save(course: Course) {
 }
 
 async function get(id: string) {
-	const course = await fetch(`/api/courses/${id}`).then(
+	const course = await fetch(`${BASE_URL}/api/courses/${id}`).then(
 		(response) => response.json() as Promise<Course>
 	);
 
@@ -29,7 +31,7 @@ async function get(id: string) {
 }
 
 async function getAll() {
-	const courses = await fetch("/api/courses").then(
+	const courses = await fetch(`${BASE_URL}/api/courses`).then(
 		(response) => response.json() as Promise<Course[]>
 	);
 
