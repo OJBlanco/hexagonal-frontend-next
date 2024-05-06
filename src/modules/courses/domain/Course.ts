@@ -1,23 +1,37 @@
-import { CourseIdNotValidError, isCourseIdValid } from "./CourseId";
-import { CourseImageUrlNotValidError, isCourseImageUrlValid } from "./CourseImageUrl";
-import { CourseTitleNotValidError, isCourseTitleValid } from "./CourseTitle";
+import { Primitives } from "@/modules/shared/domain/Primitives";
 
-export interface Course {
-  id: string;
-  title: string;
-  imageUrl: string;
-}
+import { CourseId } from "./CourseId";
+import { CourseImageUrl } from "./CourseImageUrl";
+import { CourseTitle } from "./CourseTitle";
 
-export function ensureCourseIsValid({ id, title, imageUrl}: Course): void {
-  if (!isCourseIdValid(id)) {
-    throw CourseIdNotValidError(id)
+export class Course {
+  private constructor(
+    readonly id: CourseId,
+    readonly title: CourseTitle,
+    readonly imageUrl: CourseImageUrl
+  ) { }
+
+  public static create({ id, title, imageUrl }: Primitives<Course>): Course {
+    return new Course(new CourseId(id), new CourseTitle(title), new CourseImageUrl(imageUrl));
   }
 
-  if (!isCourseTitleValid(title)) {
-    throw CourseTitleNotValidError(title)
+  idValue(): string {
+    return this.id.value;
   }
 
-  if (!isCourseImageUrlValid(imageUrl)) {
-    throw CourseImageUrlNotValidError(imageUrl)
+  titleValue(): string {
+    return this.title.value;
+  }
+
+  imageUrlValue(): string {
+    return this.imageUrl.value;
+  }
+
+  toPrimitives(): Primitives<Course> {
+    return {
+      id: this.id.value,
+      title: this.title.value,
+      imageUrl: this.imageUrl.value,
+    };
   }
 }

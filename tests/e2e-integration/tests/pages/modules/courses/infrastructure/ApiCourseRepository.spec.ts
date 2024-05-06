@@ -2,7 +2,10 @@ import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import { v4 as uuidv4 } from "uuid";
 
-import { createApiCourseRepository } from "../../../../../../../src/modules/courses/infrastructure/ApiCourseRepository";
+import { ApiCourseRepository } from "../../../../../../../src/modules/courses/infrastructure/ApiCourseRepository";
+
+import { CourseId } from "../../../../../../../src/modules/courses/domain/CourseId";
+import { Course } from "../../../../../../../src/modules/courses/domain/Course";
 
 chai.use(chaiAsPromised);
 
@@ -10,7 +13,7 @@ const expect = chai.expect;
 
 describe("Api Course repository", () => {
 	it("lists all courses with the properties id, title and imageUrl", async () => {
-		const repository = createApiCourseRepository();
+		const repository = new ApiCourseRepository();
 
 		const courses = await repository.getAll();
 
@@ -21,7 +24,7 @@ describe("Api Course repository", () => {
 	});
 
 	it("gets a course by id with the properties id, title and imageUrl", async () => {
-		const repository = createApiCourseRepository();
+		const repository = new ApiCourseRepository();
 		const courses = await repository.getAll();
 		const courseId = courses[0].id;
 		const course = await repository.get(courseId);
@@ -33,22 +36,24 @@ describe("Api Course repository", () => {
 	});
 
 	it("returns null when getting a course that does not exist", async () => {
-		const repository = createApiCourseRepository();
+		const repository = new ApiCourseRepository();
 
-		const course = await repository.get("1234");
+		const course = await repository.get(new CourseId(uuidv4()));
 
 		expect(course).to.be.null;
 	});
 
 	it("does not throw when creating a course", () => {
-		const repository = createApiCourseRepository();
-
+		const repository = new ApiCourseRepository();
+		
+		const course = Course.create({
+			id: uuidv4(),
+			title: "Course title",
+			imageUrl: "http://placekitten.com/500/400",
+		});
+		
 		return expect(
-			repository.save({
-				id: uuidv4(),
-				title: "Course title",
-				imageUrl: "http://placekitten.com/500/400",
-			})
+			repository.save(course)
 		).to.be.fulfilled;
 	});
 });

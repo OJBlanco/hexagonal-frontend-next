@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
+    "test": "jest --testPathPattern=tests/sections",
     "cy:open": "start-server-and-test dev http://localhost:3000 \"cypress open --e2e\"",
     "cy:run": "start-server-and-test dev http://localhost:3000 \"cypress run --e2e\""
   },

@@ -1,49 +1,47 @@
+import { Primitives } from "@/modules/shared/domain/Primitives";
+
 import { Course } from "../domain/Course";
+import { CourseId } from "../domain/CourseId";
 import { CourseRepository } from "../domain/CourseRepository";
 
-export function createLocalStorageCourseRepository(): CourseRepository {
-  return {
-    save,
-    get,
-    getAll
-  }
-}
+export class LocalStorageCourseRepository implements CourseRepository {
+	async save(course: Course): Promise<void> {
+		const courses = this.getAllFromLocalStorage();
+		const coursePrimitives = course.toPrimitives();
 
-async function save(course: Course) {
-  const courses = getAllFromLocalStorage()
+		courses.set(coursePrimitives.id, coursePrimitives);
 
-  courses.set(course.id, course)
+		localStorage.setItem("courses", JSON.stringify(Array.from(courses.entries())));
 
-  localStorage.setItem("courses", JSON.stringify(Array.from(courses.entries())))
-
-  await Promise.resolve()
-}
-
-async function get(id: string) {
-  const courses = getAllFromLocalStorage()
-	const course = courses.get(id)
-
-	if (!course) {
-		return Promise.resolve(null)
+		return Promise.resolve();
 	}
 
-	return Promise.resolve(course)
-}
+	async get(id: CourseId): Promise<Course | null> {
+		const courses = this.getAllFromLocalStorage();
+		const course = courses.get(id.value);
 
-async function getAll() {
-  const courses = getAllFromLocalStorage()
+		if (!course) {
+			return Promise.resolve(null);
+		}
 
-	return Promise.resolve(Array.from(courses.values()))
-}
-
-function getAllFromLocalStorage(): Map<string, Course> {
-  const courses = localStorage.getItem("courses")
-
-	if (courses === null) {
-		return new Map()
+		return Promise.resolve(Course.create(course));
 	}
 
-	const map = new Map(JSON.parse(courses) as Iterable<[string, Course]>)
+	async getAll(): Promise<Course[]> {
+		const courses = this.getAllFromLocalStorage();
 
-	return map
+		return Promise.resolve(Array.from(courses.values()).map((course) => Course.create(course)));
+	}
+
+	private getAllFromLocalStorage(): Map<string, Primitives<Course>> {
+		const courses = localStorage.getItem("courses");
+
+		if (courses === null) {
+			return new Map();
+		}
+
+		const map = new Map(JSON.parse(courses) as Iterable<[string, Primitives<Course>]>);
+
+		return map;
+	}
 }
