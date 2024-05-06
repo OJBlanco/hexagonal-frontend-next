@@ -1,39 +1,38 @@
+import { Primitives } from "@/modules/shared/domain/Primitives";
+
 import { Course } from "../domain/Course";
+import { CourseId } from "../domain/CourseId";
 import { CourseRepository } from "../domain/CourseRepository";
 
-const BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000";
+const BASE_URL = process.env.API_BASE_URL ?? "https://awesome-codely-courses.com/api/courses";
 
-export function createApiCourseRepository(): CourseRepository {
-	return {
-		save,
-		get,
-		getAll,
-	};
-}
+export class ApiCourseRepository implements CourseRepository {
+	async save(course: Course): Promise<void> {
+		const coursePrimitives = course.toPrimitives();
 
-async function save(course: Course) {
-	await fetch(`${BASE_URL}/api/courses/create`, {
-		method: "POST",
-		body: JSON.stringify({
-			id: course.id,
-			name: course.title,
-			imageUrl: course.imageUrl,
-		}),
-	});
-}
+		await fetch(`${BASE_URL}/create`, {
+			method: "POST",
+			body: JSON.stringify({
+				id: coursePrimitives.id,
+				name: coursePrimitives.title,
+				imageUrl: coursePrimitives.imageUrl,
+			}),
+		});
+	}
 
-async function get(id: string) {
-	const course = await fetch(`${BASE_URL}/api/courses/${id}`).then(
-		(response) => response.json() as Promise<Course>
-	);
+	async get(id: CourseId): Promise<Course | null> {
+		const course = await fetch(`${BASE_URL}/${id.value}`).then(
+			(response) => response.json() as Promise<Primitives<Course>>
+		);
 
-	return course;
-}
+		return Course.create(course);
+	}
 
-async function getAll() {
-	const courses = await fetch(`${BASE_URL}/api/courses`).then(
-		(response) => response.json() as Promise<Course[]>
-	);
+	async getAll(): Promise<Course[]> {
+		const courses = await fetch(BASE_URL).then(
+			(response) => response.json() as Promise<Primitives<Course>[]>
+		);
 
-	return courses;
+		return courses.map((course) => Course.create(course));
+	}
 }

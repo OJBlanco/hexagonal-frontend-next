@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react"
 import { useCourseFormData } from "../hooks/useCourseFormData"
 import { FormStatus, useCourseForm } from "../hooks/useCourseForm"
 import { Spinner } from "@/sections/shared/components/Spinner"
-import { TITLE_MAX_LENGTH, TITLE_MIN_LENGTH, isCourseTitleValid } from "@/modules/courses/domain/CourseTitle"
-import { isCourseImageUrlValid } from "@/modules/courses/domain/CourseImageUrl"
+import { CourseTitle } from "@/modules/courses/domain/CourseTitle"
+import { CourseImageUrl } from "@/modules/courses/domain/CourseImageUrl"
 
 
 const initialState = {
@@ -19,20 +19,20 @@ export function CreateCourseForm() {
 
 
 	useEffect(() => {
-		const isTitleValid = isCourseTitleValid(formData.title)
-		const isImageUrlValid = isCourseImageUrlValid(formData.imageUrl)
+		const isTitleValid = CourseTitle.isValid(formData.title);
+		const isImageUrlValid = CourseImageUrl.isValid(formData.imageUrl);
 
 		setErrors({
-			title: isTitleValid ? '' : `Title must be between ${TITLE_MIN_LENGTH} and ${TITLE_MAX_LENGTH} characters`,
-			imageUrl: isImageUrlValid ? '' : 'Image url is not valid'
-		})
-	}, [formData])
+			title: isTitleValid ? "" : CourseTitle.invalidMessage(formData.title),
+			imageUrl: isImageUrlValid ? "" : CourseImageUrl.invalidMessage(formData.imageUrl),
+		});
+	}, [formData]);
 
-	const handleSubmit = (ev: React.FormEvent) => {
-		ev.preventDefault()
+	const handleSubmit = async (ev: React.FormEvent) => {
+		ev.preventDefault();
 
-		submitForm(formData)
-	}
+		await submitForm(formData);
+	};
 
 	switch (formStatus) {
 		case FormStatus.Loading:
@@ -53,11 +53,7 @@ export function CreateCourseForm() {
 				<section id="order" className="">
 					<h2>🧑‍🏫 Create new course</h2>
 
-					<form
-						onSubmit={(ev) => {
-							handleSubmit(ev)
-						}}
-					>
+					<form>
 						<div>
 							<label htmlFor="title">Course title</label>
 							<input
@@ -89,7 +85,7 @@ export function CreateCourseForm() {
 							)}
 						</div>
 
-						<button type="submit">Create course</button>
+						<button type="button" onClick={handleSubmit}>Create course</button>
 					</form>
 				</section>
 			)

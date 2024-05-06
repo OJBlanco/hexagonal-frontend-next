@@ -1,9 +1,18 @@
-export function isCourseIdValid(id: string): boolean {
-  const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi
+import { validate } from "uuid";
 
-  return regexExp.test(id)
-}
+export class CourseId {
 
-export function CourseIdNotValidError(id: string): Error {
-	return new Error(`Id ${id} is not valid`);
+  constructor(readonly value: string) {
+    if (!CourseId.isValid(value)) {
+      throw new Error(CourseId.invalidMessage(value));
+    }
+  }
+
+  public static isValid(value: string): boolean {
+    return validate(value);
+  }
+
+  public static invalidMessage(value: string): string {
+    return `The value ${value} is not a valid uuid`;
+  }
 }
